@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exportar logo ELYZA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0d0d0d; }
+  *{ box-sizing:border-box; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    margin:0; padding:40px; color:#0d0d0d; background:#f6f5f3;
+  }
+  h1{ font-weight:600; font-size:22px; margin:0 0 6px; }
+  p.sub{ margin:0 0 28px; color:#666; font-size:14px; }
+  .card{
+    background:#fff; border:1px solid #e7e5e1; border-radius:14px;
+    padding:24px; margin-bottom:22px; box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card h2{ font-size:15px; margin:0 0 14px; font-weight:600; letter-spacing:.02em; }
+  .preview{ border-radius:10px; padding:26px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+  .preview.light{ background:#f2f1ee; }
+  .preview.dark{ background:#0d0d0d; }
+  .wordmark{
+    font-family:'Cormorant Garamond','Times New Roman',serif;
+    font-weight:400; font-style:normal; line-height:1;
+    font-size:64px; letter-spacing:.18em; text-transform:uppercase;
+    user-select:none;
+  }
+  .wordmark.ink{ color:#0d0d0d; }
+  .wordmark.white{ color:#fff; }
+  .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+  button{
+    appearance:none; border:1px solid #0d0d0d; background:#0d0d0d; color:#fff;
+    font-size:14px; padding:11px 18px; border-radius:9px; cursor:pointer;
+    font-weight:500;
+  }
+  button.ghost{ background:#fff; color:#0d0d0d; }
+  button:hover{ opacity:.88; }
+  .note{ font-size:12.5px; color:#888; margin-top:14px; line-height:1.5; }
+  .scale{ display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:13px; color:#555; }
+  .scale input{ width:200px; }
+</style>
+</head>
+<body>
+  <h1>Exportar logo ELYZA</h1>
+  <p class="sub">A logomarca ELYZA é um wordmark em Cormorant Garamond. Clique para baixar em PNG (transparente, alta resolução) ou SVG vetorial.</p>
+
+  <div class="scale">
+    <label for="res">Resolução PNG:</label>
+    <input type="range" id="res" min="2" max="8" value="6" step="1">
+    <span id="resLabel">6×</span>
+  </div>
+
+  <div class="card">
+    <h2>Versão escura (#0d0d0d) — para fundos claros</h2>
+    <div class="preview light"><span class="wordmark ink">ELYZA</span></div>
+    <div class="btns">
+      <button onclick="downloadPNG('#0d0d0d','elyza-logo-dark.png')">Baixar PNG escuro</button>
+      <button class="ghost" onclick="downloadSVG('#0d0d0d','elyza-logo-dark.svg')">Baixar SVG escuro</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Versão branca (#ffffff) — para fundos escuros</h2>
+    <div class="preview dark"><span class="wordmark white">ELYZA</span></div>
+    <div class="btns">
+      <button onclick="downloadPNG('#ffffff','elyza-logo-white.png')">Baixar PNG branco</button>
+      <button class="ghost" onclick="downloadSVG('#ffffff','elyza-logo-white.svg')">Baixar SVG branco</button>
+    </div>
+    <p class="note">Os arquivos PNG têm fundo transparente. O SVG é vetorial (escalável sem perda); ele usa a fonte Cormorant Garamond — se for abrir em um editor sem essa fonte instalada, prefira o PNG.</p>
+  </div>
+
+<script>
+  const TEXT = 'ELYZA';
+  const resInput = document.getElementById('res');
+  const resLabel = document.getElementById('resLabel');
+  resInput.addEventListener('input', () => resLabel.textContent = resInput.value + '×');
+
+  async function ensureFont(px){
+    await document.fonts.load("400 " + px + "px 'Cormorant Garamond'");
+    await document.fonts.ready;
+  }
+
+  async function renderCanvas(color){
+    const base = 240;
+    const scale = parseInt(resInput.value,10) / 6; // 6 => base 240px
+    const fontSize = Math.round(base * scale);
+    await ensureFont(fontSize);
+    const ls = 0.18 * fontSize;
+    const pad = Math.round(fontSize * 0.17);
+    const m = document.createElement('canvas').getContext('2d');
+    const fontSpec = "400 " + fontSize + "px 'Cormorant Garamond','Times New Roman',serif";
+    m.font = fontSpec; m.letterSpacing = ls + 'px';
+    const w = Math.ceil(m.measureText(TEXT).width);
+    const c = document.createElement('canvas');
+    c.width = w + pad*2;
+    c.height = Math.ceil(fontSize * 1.6);
+    const ctx = c.getContext('2d');
+    ctx.font = fontSpec; ctx.letterSpacing = ls + 'px';
+    ctx.fillStyle = color; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.fillText(TEXT, pad, c.height/2);
+    return c;
+  }
+
+  async function downloadPNG(color, filename){
+    const c = await renderCanvas(color);
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function downloadSVG(color, filename){
+    const fontSize = 240;
+    const ls = 0.18; // em
+    // approximate box: width grows with letters + letter-spacing
+    const w = 1100, h = 384;
+    const svg =
+'<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">\n' +
+'  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n' +
+'        font-family="Cormorant Garamond, Times New Roman, serif" font-weight="400"\n' +
+'        font-size="' + fontSize + '" letter-spacing="' + (ls*fontSize) + '"\n' +
+'        fill="' + color + '" style="text-transform:uppercase">ELYZA</text>\n' +
+'</svg>\n';
+    const blob = new Blob([svg], {type:'image/svg+xml'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }
+</script>
+</body>
+</html>
