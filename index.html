@@ -1934,16 +1934,16 @@ fbq('track','ViewContent',{content_name:'Dyson Airwrap Sirius',content_category:
   // Quantity logic
   const unitPrice=89,unitRetail=499;
   // Checkout - EU plug
-  // Hoje (20/06/2026): fixo na atonastore (loja nova)
-  // A partir de amanha 00:00 local: rodizio a cada 2h entre as 2 lojas
+  // Ate 21/06/2026 00:00 Londres (BST): fixo na atonastore (loja nova)
+  // A partir desse instante: rodizio a cada 2h, janelas ancoradas em Londres
   const checkoutStores=[
     'https://atonastore.com/cart/59928995758414:',
     'https://vellastbeauty.com/cart/53278312268073:'
   ];
-  const cycleStart=new Date(2026,5,21,0,0,0).getTime();
+  const cycleStart=Date.UTC(2026,5,20,23,0,0); // 21/06 00:00 BST = 20/06 23:00 UTC
   const checkoutBase=Date.now()<cycleStart
     ?checkoutStores[0]
-    :checkoutStores[Math.floor(Date.now()/(2*60*60*1000))%checkoutStores.length];
+    :checkoutStores[Math.floor((Date.now()-cycleStart)/(2*60*60*1000))%checkoutStores.length];
   let qty=1;
   const qtyVal=document.getElementById('qtyVal');
   const checkoutBtn=document.getElementById('checkoutBtn');
