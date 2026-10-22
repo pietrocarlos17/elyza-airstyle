@@ -1943,7 +1943,9 @@ fbq('track','ViewContent',{content_name:'Dyson Airwrap Sirius',content_category:
     setText('sumSub',now);
     setText('sumDisc',was-now);
     setText('sumTotal',now);
-    if(checkoutBtn)checkoutBtn.href=checkoutBase+qty;
+    // repassa as UTMs/ttclid da landing para o checkout (cross-domain:
+    // so sobrevive via URL, cookie nao atravessa dominios diferentes)
+    if(checkoutBtn)checkoutBtn.href=checkoutBase+qty+window.location.search;
   };
   updateQty();
   document.getElementById('qtyMinus').addEventListener('click',()=>{if(qty>1){qty--;updateQty()}});
